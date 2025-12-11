@@ -1,0 +1,13 @@
+<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Профиль</title><link rel="stylesheet" href="styles.css"></head><body>
+<div class="header"><div class="brand">Shixmax</div></div>
+<div class="container"><aside class="sidebar"><div style="padding:12px"><a href="index_main.html" class="btn">← Главная</a></div></aside>
+<main class="main"><div style="padding:20px"><h3>Профиль</h3><div style="max-width:420px"><label>Никнейм</label><input id="nick" style="width:100%;padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.04)"><div style="height:8px"></div><label>Аватар</label><input id="avatarFile" type="file" accept="image/*"><div style="height:12px"></div><div class="avatar" style="width:96px;height:96px"><img id="avatarPreview" src=""></div><div style="height:12px"></div><button id="saveProfile" class="btn">Сохранить</button></div></div></main></div>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
+<script src="firebase.js"></script>
+<script src="app.js"></script>
+<script>
+auth.onAuthStateChanged(async user=>{ if(!user) return location.href='index.html'; const snap=await db.ref('profiles/'+user.uid).once('value'); const p=snap.val()||{}; document.getElementById('nick').value = p.name||user.email; if(p.avatar) document.getElementById('avatarPreview').src = p.avatar; document.getElementById('avatarFile').addEventListener('change', async ()=>{ const f=document.getElementById('avatarFile').files[0]; if(!f) return; const form=new FormData(); form.append('pub_key','0c7ba840bf1b89f09ee3'); form.append('file', f); const res=await fetch('https://upload.uploadcare.com/base/',{method:'POST',body:form}); const data=await res.json(); const url = data.file ? 'https://ucarecdn.com/'+data.file : null; if(url){ document.getElementById('avatarPreview').src=url; await db.ref('profiles/'+user.uid).update({ avatar: url }); } }); document.getElementById('saveProfile').addEventListener('click', async ()=>{ const name=document.getElementById('nick').value.trim()||user.email; await db.ref('profiles/'+user.uid).update({ name }); alert('Сохранено'); }); });
+</script>
+</body></html>
